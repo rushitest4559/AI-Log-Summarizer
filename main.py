@@ -33,7 +33,7 @@ def main():
     # -----------------------------------------------------------------------------
     # 2. Filter & Deduplicate Logs
     # -----------------------------------------------------------------------------
-    print("🧹 Step 2: Filtering and deduplicating logs to remove noise...")
+    print("\n🧹 Step 2: Filtering and deduplicating logs to remove noise...")
     try:
         filter_aws_logs()
         filter_azure_logs()
@@ -45,7 +45,7 @@ def main():
     # -----------------------------------------------------------------------------
     # 3. AI Analysis
     # -----------------------------------------------------------------------------
-    print("🤖 Step 3: Sending filtered data to Gemini for analysis...")
+    print("\n🤖 Step 3: Sending filtered data to Gemini for analysis...")
     # ask_gemini now reads from the .md files automatically
     summary = ask_gemini()
     
@@ -61,7 +61,7 @@ def main():
     # 4. Send Notification
     # -----------------------------------------------------------------------------
     if args.email:
-        print(f"📧 Step 4: Sending summary to {args.email}...")
+        print(f"\n📧 Step 4: Sending summary to {args.email}...")
         result = send_email(summary, args.email)
         
         if result["success"]:
