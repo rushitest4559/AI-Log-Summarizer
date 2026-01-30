@@ -1,82 +1,68 @@
-☁️ Daily Cloud Security Sentinel
-An automated monitoring tool that fetches logs from AWS CloudTrail and Azure Activity Logs, uses Gemini AI to filter out background noise, and emails a concise security summary of the last 24 hours.
+# 🚀 Daily Cloud Security Monitor
 
-🚀 Features
-Multi-Cloud Support: Integrated with AWS and Azure.
+An automated, AI-powered security auditor that scans **AWS CloudTrail** and **Azure Activity Logs** every 24 hours. It uses **OIDC (Keyless) Auth** for maximum security and **Gemini 3 Flash Preview** to distill thousands of logs into a high-density, actionable email report.
 
-Smart Filtering: Reduces raw log noise (e.g., 350KB JSON → 8KB Markdown) to stay within AI context limits and save costs.
+---
 
-AI Analysis: Uses Google Gemini to identify suspicious patterns, unauthorized access attempts, and resource changes.
+## Algorithm of script
+- **Login into aws and azure using oidc**
+- **fecthes logs from aws cloudtrail and azure activity logs of last 24 hours**
+- **fetch logs in batches like fecth only 100 logs at a time and immediately write it into files aws_logs_24h.json and azure_logs_24h.json**
+- **filter logs into aws_logs_filtered_24h.md and azure_logs_filtered_24h.md files, it does not filters out rows but it identify patterns and write patterns in this .md files**
+- **send this files (aws_logs_filtered_24h.md and azure_logs_filtered_24h.md) to gemini free ai api model and generate summary from this filtered logs**
+- **send this summary to recipient mail**  
 
-Automated Reporting: Sends a clean, professional security report via email.
+---
 
-🛠️ Setup & Local Usage
-Clone the Repo:
+## 📺 Project Walkthrough
 
-Bash
-git clone https://github.com/your-username/cloud-logs-monitor.git
-cd cloud-logs-monitor
-Install Dependencies:
+[![Watch the Demo]](https://youtu.be/lP4XYvb5oPo)  
 
-Bash
-pip install -r requirements.txt
-Configure Environment: Create a .env file:
+---
 
-Code snippet
-GOOGLE_API_KEY=your_gemini_api_key
-EMAIL_FROM=your_email@gmail.com
-EMAIL_PASSWORD=your_app_password
-AZURE_SUBSCRIPTION_ID=your_id
-Run the Script:
+## ✨ Key Features
 
-Bash
-python main.py --email your-recipient@example.com
-🤖 GitHub Actions: Run Daily for Free
-You don't need to run this manually. You can host it for free using GitHub Actions.
+- **Multi-Cloud:** Unified reporting for AWS and Azure.
+- **OIDC Security:** No long-lived credentials; uses GitHub Actions as a trusted identity provider.
+- **AI Log Compression:** Aggressive filtering reduces "log noise" by 90% before analysis, saving tokens and costs.
+- **Daily Automation:** Fully automated via GitHub Actions Cron.
 
-1. Fork this Repository
-Click the Fork button at the top right of this page.
+---
 
-2. Configure Secrets
-Go to Settings > Secrets and variables > Actions and add the following secrets:
+## 🛠️ Tech Stack
 
-GOOGLE_API_KEY: Your Gemini API key.
+- **Cloud:** AWS (CloudTrail, IAM), Azure (Monitor, Entra ID)
+- **AI:** Google Gemini 3 Flash
+- **CI/CD:** GitHub Actions (OIDC + Python)
+- **Logic:** Python (Boto3, Azure-SDK)
 
-EMAIL_FROM & EMAIL_PASSWORD: Your sender credentials (use Gmail App Passwords).
+---
 
-AZURE_SUBSCRIPTION_ID: Your Azure sub ID.
+## Run this script in your Laptop
+1. Clone the repo
+2. If you want to run this only for AWS then you must have aws configure already done in your laptop and you have cloudtrail logs view access for us-east-1. If you only want to run this for azure then you must have az login already done in your laptop and you have access of view azure activity logs. For both aws and azure you must have az login and aws configure already done in command line before running this script.
+3. For only aws logs summary comment the line no 28, 31, 39 in main.py and for only azure comment the line no 29, 32, 40 in main.py, If you want summary for both your aws and azure accounts then don't comment anything.
+4. Create .env file in root folder of project and write this environment variables: GOOGLE_API_KEY, AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID, EMAIL_FROM, EMAIL_PASSWORD. 
+5. GOOGLE_API_KEY, EMAIL_FROM, EMAIL_PASSWORD(16 chars email app password not email password), this 3 env variables are mandatory, if you don't want summary of azure then you can comment the lines in main.py (step 3) and ignore this 2 variables.
+6. GOOGLE_API_KEY generated from google ai studio website which is completely free because free tier is enough for this project.
+7. Ensure you have python in your laptop and run pip install requirements.txt
+8. RUN python main.py --email "type email where you want to recieve ai summary"
+9. Open your email and see the summary.
 
-RECIPIENT_EMAIL: Where you want the daily report sent.
+---
 
-3. Setup OIDC (Cloud Authentication)
-To allow GitHub to talk to AWS/Azure without storing permanent keys:
+## RUN this script daily automatically at free of cost
+1. Fork this repo
+2. Add this environment variables in your repo settings as repo secrets: EMAIL_FROM, EMAIL_PASSWORD, GOOGLE_API_KEY, RECIPIENT_EMAIL. 
+3. For only aws logs summary comment the line no 28, 31, 39 in main.py and for only azure comment the line no 29, 32, 40 in main.py, If you want summary for both your aws and azure accounts then don't comment anything. For only aws skip the 5th step and for only azure skip the 4th step. For only aws comment the lines 29 to 34 in daily-logs.yml file and for only azure comment the lines 23 to 27 in daily-logs.yml file.
+4. For AWS, login into aws account, create identity provider for this github actions and create role with Cloudtrail read policy (get help of ai how to create identity provider and attach role for github actions to view cloudtrial logs). Create one more secret in github repo settings AWS_ROLE_ARN and paste the role arn which you created in aws console.
+5. For AZURE create entra id app with federated credentials (get help of ai how to setup oidc for github actions in azure) and create 3 more secrets in github repo settings AZURE_CLIENT_ID, AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID. 
+6. After setting this variables correctly, wait for night 12 am and you get sumary of what happen in your aws and azure account automatically absolutely free of cost.
 
-For AWS: Create an IAM Role with a Trust Policy for GitHub Actions OIDC and attach ReadOnlyAccess.
+## 🤝 Connect With Me
 
-For Azure: Register an App in Entra ID, add Federated Credentials for your GitHub branch, and assign the Reader role.
+If you found this helpful, let's connect! I post about cloud security and AI automation regularly.
 
-⚠️ Limitations & Security Notes
-1. Regional Visibility (AWS)
-Current Status: This script fetches logs primarily from us-east-1 and your specified primary region.
+[**Check out my post about this on LinkedIn**](https://www.linkedin.com/in/rushikesh-nikam-11637033a/)
 
-The Risk: "Shadow Infrastructure." A hacker could launch resources in an unused region (e.g., af-south-1) which this script might miss unless those regions are explicitly checked.
-
-The Solution:
-
-Option A: Enable Global Trail in AWS CloudTrail. This consolidates all regional logs into one S3 bucket, which the script can then read centrally.
-
-Option B: Modify the script to iterate through all AWS regions (Note: This increases execution time and GitHub Runner usage).
-
-2. AI Quota
-Using the Free Tier of Gemini may result in 429 Resource Exhausted errors if the logs are too large or the script is run too frequently. Our filtering logic mitigates this, but high-activity accounts may require a paid Gemini tier.
-
-🏗️ Project Architecture
-The project is built with a modular approach:
-
-Fetchers: Connect to Cloud APIs and download raw JSON.
-
-Filters: Clean and deduplicate data into Markdown (MD) format.
-
-Analyzer: Feeds MD files to Gemini AI with a security-focused prompt.
-
-Notifier: Dispatches the final analysis via SMTP.
+---
